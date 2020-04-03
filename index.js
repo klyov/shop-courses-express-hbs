@@ -1,6 +1,7 @@
 const express = require("express");
 const path = require("path");
 const exphbs = require("express-handlebars");
+const mongoose = require("mongoose");
 const app = express();
 const homeRoutes = require("./routes/home");
 const coursesRoutes = require("./routes/courses");
@@ -25,6 +26,17 @@ app.use("/courses", coursesRoutes);
 app.use("/add", addRoutes);
 app.use("/cart", cartRoutes);
 
-app.listen(PORT, () => {
-  console.log(`listen port: ${PORT}`);
-});
+async function start() {
+  try {
+    const password = "1eZnn84yJ116tRjr";
+    const url = `mongodb+srv://klyov:${password}@cluster0-o39g5.mongodb.net/test?retryWrites=true&w=majority`;
+    await mongoose.connect(url, { useNewUrlParser: true });
+    app.listen(PORT, () => {
+      console.log(`listen port: ${PORT}`);
+    });
+  } catch (err) {
+    console.log(err);
+  }
+}
+
+start();
