@@ -2,11 +2,12 @@ const express = require("express");
 const path = require("path");
 const exphbs = require("express-handlebars");
 const mongoose = require("mongoose");
-const app = express();
 const homeRoutes = require("./routes/home");
 const coursesRoutes = require("./routes/courses");
 const addRoutes = require("./routes/add");
 const cartRoutes = require("./routes/cart");
+
+const app = express();
 
 const PORT = process.env.PORT || 3000;
 
@@ -29,13 +30,13 @@ app.use("/cart", cartRoutes);
 async function start() {
   try {
     const password = "1eZnn84yJ116tRjr";
-    const url = `mongodb+srv://klyov:${password}@cluster0-o39g5.mongodb.net/test?retryWrites=true&w=majority`;
+    const url = `mongodb+srv://klyov:${password}@cluster0-o39g5.mongodb.net/shop`;
     await mongoose.connect(url, { useNewUrlParser: true });
     app.listen(PORT, () => {
       console.log(`listen port: ${PORT}`);
     });
   } catch (err) {
-    console.log(err);
+    console.log(err, "err connect to db");
   }
 }
 
