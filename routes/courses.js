@@ -2,16 +2,24 @@ const { Router } = require("express");
 const router = Router();
 const Course = require("../models/course");
 
+function transformCourses(courses) {
+  const copyCourses = [];
+  for (let i = 0; i < courses.length; i++) {
+    copyCourses.push(courses[i].transform());
+  }
+  return copyCourses;
+}
+
 router.get("/", async (req, res) => {
-  const courses = await Course.find()
-    .populate("userId", "email name")
-    // .select("price title")
-    .lean();
-  console.log(courses);
+  const courses = await Course.find().populate("userId", "email name");
+  // .select("price title")
+  // .lean();
+  // console.log(courses);
+
   res.render("courses", {
     title: "Курсы",
     isCourses: true,
-    courses
+    courses: transformCourses(courses)
   });
 
   // res.sendFile(path.join(__dirname, "views", "about.html"));
