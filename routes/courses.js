@@ -3,8 +3,11 @@ const router = Router();
 const Course = require("../models/course");
 
 router.get("/", async (req, res) => {
-  const courses = await Course.find().lean();
-
+  const courses = await Course.find()
+    .populate("userId", "email name")
+    // .select("price title")
+    .lean();
+  console.log(courses);
   res.render("courses", {
     title: "Курсы",
     isCourses: true,
@@ -42,6 +45,17 @@ router.post("/edit", async (req, res) => {
   await Course.findByIdAndUpdate(id, req.body);
 
   res.redirect("/courses");
+});
+
+router.post("/remove", async (req, res) => {
+  try {
+    await Course.deleteOne({
+      _id: req.body.id
+    });
+    res.redirect("/courses");
+  } catch (err) {
+    console.log(err);
+  }
 });
 
 module.exports = router;
