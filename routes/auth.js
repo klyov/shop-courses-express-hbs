@@ -6,7 +6,9 @@ const router = Router();
 router.get("/login", async (req, res) => {
   res.render("auth/login", {
     title: "Авторизация",
-    isLogin: true
+    isLogin: true,
+    loginError: req.flash("loginError"),
+    registerError: req.flash("registerError"),
   });
 });
 
@@ -30,7 +32,7 @@ router.post("/login", async (req, res) => {
         req.session.user = user;
         req.session.isAuth = true;
 
-        req.session.save(err => {
+        req.session.save((err) => {
           if (err) {
             throw err;
           } else {
@@ -38,9 +40,11 @@ router.post("/login", async (req, res) => {
           }
         });
       } else {
+        req.flash("loginError", "Неверный пароль");
         res.redirect("/auth/login#login");
       }
     } else {
+      req.flash("loginError", "Такого пользователя не существует");
       res.redirect("/auth/login#login");
     }
   } catch (error) {
@@ -55,6 +59,7 @@ router.post("/register", async (req, res) => {
     const candidate = await User.findOne({ email });
 
     if (candidate) {
+      req.flash("registerError", "Пользователь с таким email уже существует");
       res.redirect("/auth/login#register");
     } else {
       const hashPassword = await bcrypt.hash(password, 10);
@@ -63,8 +68,8 @@ router.post("/register", async (req, res) => {
         name,
         password: hashPassword,
         cart: {
-          items: []
-        }
+          items: [],
+        },
       });
       await user.save();
       res.redirect("/auth/login#login");
