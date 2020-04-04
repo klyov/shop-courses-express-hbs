@@ -1,0 +1,7 @@
+module.exports = {
+  MONGODB_URI: `MONGODB_URI`,
+  SESSION_SECRET: "some secret value",
+  SENDGRID_API_KEY: "SENDGRID_API_KEY",
+  EMAIL_FROM: "EMAIL_FROM",
+  BASE_URL: "BASE_URL",
+};
