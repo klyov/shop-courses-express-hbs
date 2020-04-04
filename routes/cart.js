@@ -1,5 +1,5 @@
 const { Router } = require("express");
-// const User = require("../models/user");
+const auth = require("../middleware/auth");
 const Course = require("../models/course");
 
 const router = Router();
@@ -15,13 +15,13 @@ function computePrice(courses) {
   return courses.reduce((acc, val) => acc + val.count * val.price, 0);
 }
 
-router.post("/add", async (req, res) => {
+router.post("/add", auth, async (req, res) => {
   const course = await Course.findById(req.body.id);
   await req.user.addToCart(course);
   res.redirect("/cart");
 });
 
-router.get("/", async (req, res) => {
+router.get("/", auth, async (req, res) => {
   //   const cart = await Cart.fetch();
 
   const user = await req.user.populate("cart.items.courseId").execPopulate();
@@ -36,7 +36,7 @@ router.get("/", async (req, res) => {
   });
 });
 
-router.delete("/remove/:id", async (req, res) => {
+router.delete("/remove/:id", auth, async (req, res) => {
   // const cart = await Cart.remove(req.params.id);
 
   await req.user.removeFromCart(req.params.id);

@@ -1,8 +1,10 @@
 const { Router } = require("express");
-const router = Router();
 const Course = require("../models/course");
+const auth = require("../middleware/auth");
 
-router.get("/", (req, res) => {
+const router = Router();
+
+router.get("/", auth, (req, res) => {
   res.render("add", {
     title: "Новый курс",
     isAdd: true
