@@ -1,10 +1,12 @@
 const { Router } = require("express");
 const User = require("../models/user");
 const bcrypt = require("bcryptjs");
+const crypto = require("crypto");
 const nodemailer = require("nodemailer");
 const sendgrid = require("nodemailer-sendgrid-transport");
 const keys = require("../keys");
 const regEmail = require("../emails/registration");
+const resetEmail = require("../emails/reset");
 const router = Router();
 
 const transporter = nodemailer.createTransport(
@@ -86,6 +88,96 @@ router.post("/register", async (req, res) => {
       await user.save();
       res.redirect("/auth/login#login");
       await transporter.sendMail(regEmail(email));
+    }
+  } catch (err) {
+    console.log(err);
+  }
+});
+
+router.get("/reset", (req, res) => {
+  res.render("auth/reset", {
+    title: "Забыли пароль",
+    error: req.flash("error"),
+  });
+});
+
+router.post("/reset", (req, res) => {
+  try {
+    crypto.randomBytes(32, async (err, buffer) => {
+      if (err) {
+        req.flash("error", "Что то пошло не так, повторите попытку позже");
+        return res.redirect("/auth/reset");
+      }
+
+      const token = buffer.toString("hex");
+      const { email } = req.body;
+
+      const candidate = await User.findOne({ email });
+
+      if (candidate) {
+        candidate.resetToken = token;
+        candidate.resetTokenExp = Date.now() + 60 * 60 * 1000; // 1 hour exp
+        await candidate.save();
+        await transporter.sendMail(resetEmail(email, token));
+        res.redirect("/auth/login");
+      } else {
+        req.flash("error", "Такого email нет");
+        return res.redirect("/auth/reset");
+      }
+    });
+  } catch (err) {
+    console.log(err);
+  }
+});
+
+router.get("/password/:token", async (req, res) => {
+  const { token } = req.params;
+
+  if (!token) {
+    return res.redirect("/auth/login");
+  }
+
+  try {
+    const user = await User.findOne({
+      resetToken: token,
+      resetTokenExp: { $gt: Date.now() },
+    });
+
+    if (!user) {
+      req.flash("logineError", "Время жизни токена истекло");
+      return res.redirect("/auth/login");
+    } else {
+      res.render("auth/password", {
+        title: "Новый пароль",
+        error: req.flash("error"),
+        userId: user._id.toString(),
+        token,
+      });
+    }
+  } catch (err) {
+    console.log(err);
+  }
+});
+
+router.post("/password", async (req, res) => {
+  try {
+    const { userId, token, password } = req.body;
+
+    const user = await User.findOne({
+      _id: userId,
+      resetToken: token,
+      resetTokenExp: { $gt: Date.now() },
+    });
+
+    if (!user) {
+      req.flash("logineError", "Время жизни токена истекло");
+      return res.redirect("/auth/login");
+    } else {
+      user.password = await bcrypt.hash(password, 10);
+      user.resetToken = undefined;
+      user.resetTokenExp = undefined;
+      user.save();
+      res.redirect("/auth/login");
     }
   } catch (err) {
     console.log(err);
