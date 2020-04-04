@@ -1,7 +1,7 @@
 function toCurrency(price) {
   return new Intl.NumberFormat("ru-RU", {
     currency: "rub",
-    style: "currency"
+    style: "currency",
   }).format(price);
 }
 
@@ -12,40 +12,44 @@ function toDate(date) {
     year: "numeric",
     hour: "2-digit",
     minute: "2-digit",
-    second: "2-digit"
+    second: "2-digit",
   }).format(new Date(date));
 }
 
-document.querySelectorAll(".price").forEach(node => {
+document.querySelectorAll(".price").forEach((node) => {
   node.textContent = toCurrency(node.textContent);
 });
 
-document.querySelectorAll(".date").forEach(node => {
+document.querySelectorAll(".date").forEach((node) => {
   node.textContent = toDate(node.textContent);
 });
 
 const $cart = document.querySelector("#cart");
 
 if ($cart) {
-  $cart.addEventListener("click", event => {
+  $cart.addEventListener("click", (event) => {
     console.log(event);
     if (event.target.classList.contains("js-remove")) {
       const id = event.target.dataset.id;
+      const csrf = event.target.dataset.csrf;
       console.log(id);
       fetch("/cart/remove/" + id, {
-        method: "delete"
+        method: "delete",
+        headers: {
+          "X-XSRF-TOKEN": csrf,
+        },
       })
-        .then(res => res.json())
-        .then(cart => {
+        .then((res) => res.json())
+        .then((cart) => {
           if (cart.courses.length) {
             const html = cart.courses
-              .map(c => {
+              .map((c) => {
                 return `
                   <tr>
                     <td>${c.title}</td>
                     <td>${c.count}</td>
                     <td> 
-                        <button class='btn btn-small btn-danger js-remove' data-id="${c.id}">
+                        <button class='btn btn-small btn-danger js-remove' data-id="${c.id}" data-csrf="${csrf}">
                             Удалить
                         </button>
                     </td>
