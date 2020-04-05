@@ -6,6 +6,7 @@ const session = require("express-session");
 const flash = require("connect-flash");
 const MongoStore = require("connect-mongodb-session")(session);
 const csrf = require("csurf");
+const helmet = require("helmet");
 const homeRoutes = require("./routes/home");
 const coursesRoutes = require("./routes/courses");
 const addRoutes = require("./routes/add");
@@ -52,6 +53,7 @@ app.use(
 app.use(fileMiddleware.single("avatar"));
 app.use(csrf());
 app.use(flash());
+app.use(helmet());
 app.use(varMiddleware);
 app.use(userMiddleware);
 

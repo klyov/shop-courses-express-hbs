@@ -1,5 +1,6 @@
 /node_modules
-/keys/index.js
+/keys/keys.dev.js
+/keys/keys.prod.js
 
 images/*.png
 images/*.jpg
