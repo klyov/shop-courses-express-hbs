@@ -6,7 +6,7 @@ NodeJS App on (Express and Handlebars)
 
 #### Copy and rename keys/index.example.js
 
-Rename to keys/keys.dev.js and keys/keys.prod.js
+Rename to keys/keys.dev.js
 
 #### Install node package
 
