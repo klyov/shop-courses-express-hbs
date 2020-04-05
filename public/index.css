@@ -49,3 +49,8 @@
   color: red;
   font-weight: bold;
 }
+
+.avatar {
+  max-width: 200px;
+  height: auto;
+}
